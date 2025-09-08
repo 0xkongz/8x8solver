@@ -1,5 +1,7 @@
 # 8x8solver
 
+https://0xkongz.github.io/8x8solver/
+
 index.html - Complete HTML structure with:
 
 Custom board editor (8x8 grid)
