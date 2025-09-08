@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8x8 Block Puzzle Solver</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>8x8 Block Puzzle Solver</h1>
+    </header>
+    
+    <main>
+        <section id="board-editor">
+            <h2>Board Editor</h2>
+            <!-- Board will be rendered here -->
+            <div id="board"></div>
+        </section>
+        
+        <section id="pieces-selector">
+            <h2>Pieces Selector</h2>
+            <!-- Options for selecting pieces -->
+            <div id="pieces"></div>
+        </section>
+        
+        <section id="custom-piece-creator">
+            <h2>Custom Piece Creator</h2>
+            <!-- Form for creating custom pieces -->
+            <form id="custom-piece-form">
+                <input type="text" placeholder="Piece Name" required>
+                <input type="text" placeholder="Piece Shape" required>
+                <button type="submit">Create Piece</button>
+            </form>
+        </section>
+        
+        <section id="solver-controls">
+            <h2>Solver Controls</h2>
+            <button id="solve-button">Solve</button>
+            <button id="reset-button">Reset</button>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2023 8x8 Puzzle Solver</p>
+    </footer>
+</body>
+</html>
