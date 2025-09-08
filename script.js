@@ -1,6 +1,7 @@
 class BlockPuzzleSolver {
     constructor() {
         this.board = Array(8).fill().map(() => Array(8).fill(false));
+        this.originalBoard = null; // Store original board state when solution starts
         this.pieces = [[], [], []];
         this.solution = null;
         this.currentStep = 0;
@@ -333,6 +334,9 @@ class BlockPuzzleSolver {
             return;
         }
         
+        // Store the original board state
+        this.originalBoard = this.board.map(row => [...row]);
+        
         document.getElementById('solutionInfo').innerHTML = 
             '<div style="color: #4CAF50;">Solving... Please wait.</div>';
         
@@ -347,6 +351,7 @@ class BlockPuzzleSolver {
                 document.getElementById('solutionInfo').innerHTML = 
                     '<div style="color: #ff6b6b;">No solution found! Try a different configuration.</div>';
                 document.getElementById('solutionSteps').innerHTML = '';
+                this.originalBoard = null;
             }
         }, 100);
     }
@@ -405,9 +410,34 @@ class BlockPuzzleSolver {
     }
 
     showCurrentStep() {
-        if (!this.solution || this.solution.length === 0) return;
+        if (!this.solution || this.solution.length === 0 || !this.originalBoard) return;
         
-        // Reset board display
+        // Start with the original board state
+        let currentBoard = this.originalBoard.map(row => [...row]);
+        
+        // Apply all moves up to and including the current step
+        for (let i = 0; i <= this.currentStep && i < this.solution.length; i++) {
+            const move = this.solution[i];
+            const compactPiece = this.getCompactPiece(move.piece);
+            
+            // Place the piece on the current board
+            compactPiece.forEach(([row, col]) => {
+                const boardRow = move.position[0] + row;
+                const boardCol = move.position[1] + col;
+                if (boardRow >= 0 && boardRow < 8 && boardCol >= 0 && boardCol < 8) {
+                    currentBoard[boardRow][boardCol] = true;
+                }
+            });
+            
+            // Apply line clearing if this is the current step or earlier
+            const { board: clearedBoard } = this.clearLines(currentBoard);
+            currentBoard = clearedBoard;
+        }
+        
+        // Update the actual board state with accumulated moves
+        this.board = currentBoard.map(row => [...row]);
+        
+        // Update display with the accumulated board state
         const cells = document.querySelectorAll('#gameBoard .board-cell');
         cells.forEach(cell => {
             const row = parseInt(cell.dataset.row);
@@ -418,17 +448,17 @@ class BlockPuzzleSolver {
             }
         });
         
-        // Show current step
+        // Highlight the current step's piece if we're not at the end
         if (this.currentStep < this.solution.length) {
-            const move = this.solution[this.currentStep];
-            const compactPiece = this.getCompactPiece(move.piece);
+            const currentMove = this.solution[this.currentStep];
+            const compactPiece = this.getCompactPiece(currentMove.piece);
             
             compactPiece.forEach(([row, col]) => {
-                const boardRow = move.position[0] + row;
-                const boardCol = move.position[1] + col;
+                const boardRow = currentMove.position[0] + row;
+                const boardCol = currentMove.position[1] + col;
                 const cell = document.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
-                if (cell) {
-                    cell.classList.add(`solution-step-${move.pieceIndex + 1}`);
+                if (cell && this.board[boardRow][boardCol]) {
+                    cell.classList.add(`solution-step-${currentMove.pieceIndex + 1}`);
                 }
             });
             
@@ -438,7 +468,16 @@ class BlockPuzzleSolver {
                     <strong>Solution Found!</strong><br>
                     ${this.solution.length} pieces to place<br>
                     Step ${this.currentStep + 1} of ${this.solution.length}<br>
-                    <strong>Current:</strong> Place Piece ${move.pieceIndex + 1} at Row ${move.position[0] + 1}, Column ${move.position[1] + 1}
+                    <strong>Current:</strong> Place Piece ${currentMove.pieceIndex + 1} at Row ${currentMove.position[0] + 1}, Column ${currentMove.position[1] + 1}
+                </div>
+            `;
+        } else {
+            // All steps completed
+            document.getElementById('solutionInfo').innerHTML = `
+                <div style="color: #4CAF50;">
+                    <strong>Solution Completed!</strong><br>
+                    All ${this.solution.length} pieces placed successfully!<br>
+                    Board is ready for the next round.
                 </div>
             `;
         }
@@ -476,6 +515,7 @@ class BlockPuzzleSolver {
     resetSolution() {
         this.solution = null;
         this.currentStep = 0;
+        this.originalBoard = null;
         document.getElementById('solutionInfo').innerHTML = '';
         document.getElementById('solutionSteps').innerHTML = '';
         
