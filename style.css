@@ -71,6 +71,15 @@ h2 {
     border-radius: 3px;
     cursor: pointer;
     transition: all 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.board-cell:hover {
+    border-color: #666;
+    transform: scale(1.05);
 }
 
 .board-cell.filled {
@@ -128,6 +137,15 @@ h2 {
     border-radius: 2px;
     cursor: pointer;
     transition: all 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.piece-cell:hover {
+    border-color: #666;
+    transform: scale(1.1);
 }
 
 .piece-cell.filled {
@@ -252,4 +270,20 @@ select {
         width: 20px;
         height: 20px;
     }
+}
+
+/* Drag and drop improvements */
+body.dragging {
+    cursor: grabbing !important;
+}
+
+body.dragging * {
+    cursor: grabbing !important;
+}
+
+.board-cell.drag-preview,
+.piece-cell.drag-preview {
+    opacity: 0.7;
+    border-color: #FFD700 !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }

@@ -7,6 +7,11 @@ class BlockPuzzleSolver {
         this.currentStep = 0;
         this.creatorPiece = Array(5).fill().map(() => Array(5).fill(false));
         
+        // Drag state tracking
+        this.isDragging = false;
+        this.dragMode = null; // 'fill' or 'clear'
+        this.dragTarget = null; // 'board', 'creator', or piece index
+        
         this.initializeUI();
         this.setupEventListeners();
         this.generateRandomPieces();
@@ -28,10 +33,22 @@ class BlockPuzzleSolver {
                 cell.className = 'board-cell';
                 cell.dataset.row = row;
                 cell.dataset.col = col;
-                cell.addEventListener('click', () => this.toggleBoardCell(row, col));
+                
+                // Mouse events for drag functionality
+                cell.addEventListener('mousedown', (e) => this.startDrag(e, 'board', row, col));
+                cell.addEventListener('mouseenter', (e) => this.continueDrag(e, 'board', row, col));
+                cell.addEventListener('mouseup', () => this.endDrag());
+                
+                // Prevent context menu and text selection
+                cell.addEventListener('contextmenu', e => e.preventDefault());
+                cell.addEventListener('selectstart', e => e.preventDefault());
+                
                 boardElement.appendChild(cell);
             }
         }
+        
+        // Global mouse events for drag end
+        document.addEventListener('mouseup', () => this.endDrag());
     }
 
     createPieceGrids() {
@@ -45,7 +62,16 @@ class BlockPuzzleSolver {
                     cell.className = 'piece-cell';
                     cell.dataset.row = row;
                     cell.dataset.col = col;
-                    cell.addEventListener('click', () => this.togglePieceCell(pieceIndex, row, col));
+                    
+                    // Mouse events for drag functionality
+                    cell.addEventListener('mousedown', (e) => this.startDrag(e, pieceIndex, row, col));
+                    cell.addEventListener('mouseenter', (e) => this.continueDrag(e, pieceIndex, row, col));
+                    cell.addEventListener('mouseup', () => this.endDrag());
+                    
+                    // Prevent context menu and text selection
+                    cell.addEventListener('contextmenu', e => e.preventDefault());
+                    cell.addEventListener('selectstart', e => e.preventDefault());
+                    
                     pieceElement.appendChild(cell);
                 }
             }
@@ -62,7 +88,16 @@ class BlockPuzzleSolver {
                 cell.className = 'piece-cell';
                 cell.dataset.row = row;
                 cell.dataset.col = col;
-                cell.addEventListener('click', () => this.toggleCreatorCell(row, col));
+                
+                // Mouse events for drag functionality
+                cell.addEventListener('mousedown', (e) => this.startDrag(e, 'creator', row, col));
+                cell.addEventListener('mouseenter', (e) => this.continueDrag(e, 'creator', row, col));
+                cell.addEventListener('mouseup', () => this.endDrag());
+                
+                // Prevent context menu and text selection
+                cell.addEventListener('contextmenu', e => e.preventDefault());
+                cell.addEventListener('selectstart', e => e.preventDefault());
+                
                 creatorElement.appendChild(cell);
             }
         }
@@ -97,6 +132,80 @@ class BlockPuzzleSolver {
     toggleCreatorCell(row, col) {
         this.creatorPiece[row][col] = !this.creatorPiece[row][col];
         this.updateCreatorDisplay();
+    }
+
+    // Drag functionality methods
+    startDrag(event, target, row, col) {
+        event.preventDefault();
+        this.isDragging = true;
+        this.dragTarget = target;
+        
+        // Add dragging class to body for cursor change
+        document.body.classList.add('dragging');
+        
+        // Determine initial drag mode based on current cell state
+        let currentState = false;
+        if (target === 'board') {
+            currentState = this.board[row][col];
+        } else if (target === 'creator') {
+            currentState = this.creatorPiece[row][col];
+        } else if (typeof target === 'number') {
+            // Piece grid
+            if (!this.pieces[target][row]) {
+                this.pieces[target][row] = Array(5).fill(false);
+            }
+            currentState = this.pieces[target][row][col];
+        }
+        
+        // Set drag mode opposite to current state
+        this.dragMode = currentState ? 'clear' : 'fill';
+        
+        // Apply initial change
+        this.applyDragChange(target, row, col);
+    }
+
+    continueDrag(event, target, row, col) {
+        if (!this.isDragging || this.dragTarget !== target) return;
+        
+        event.preventDefault();
+        this.applyDragChange(target, row, col);
+    }
+
+    endDrag() {
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.dragMode = null;
+            this.dragTarget = null;
+            
+            // Remove dragging class from body
+            document.body.classList.remove('dragging');
+        }
+    }
+
+    applyDragChange(target, row, col) {
+        if (target === 'board') {
+            const newState = this.dragMode === 'fill';
+            if (this.board[row][col] !== newState) {
+                this.board[row][col] = newState;
+                this.updateBoardDisplay();
+            }
+        } else if (target === 'creator') {
+            const newState = this.dragMode === 'fill';
+            if (this.creatorPiece[row][col] !== newState) {
+                this.creatorPiece[row][col] = newState;
+                this.updateCreatorDisplay();
+            }
+        } else if (typeof target === 'number') {
+            // Piece grid
+            if (!this.pieces[target][row]) {
+                this.pieces[target][row] = Array(5).fill(false);
+            }
+            const newState = this.dragMode === 'fill';
+            if (this.pieces[target][row][col] !== newState) {
+                this.pieces[target][row][col] = newState;
+                this.updatePieceDisplay(target);
+            }
+        }
     }
 
     updateBoardDisplay() {
