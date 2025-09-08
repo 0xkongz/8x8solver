@@ -396,39 +396,65 @@ class BlockPuzzleSolver {
         return { board: newBoard, clearedLines };
     }
 
-    // Backtracking solver
+    // Backtracking solver with piece permutation support
     solve(board, pieces, placedPieces = []) {
         if (pieces.length === 0) {
             return { success: true, moves: placedPieces };
         }
         
-        const currentPiece = pieces[0];
-        const remainingPieces = pieces.slice(1);
-        
-        // Try placing the piece at every possible position
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                if (this.canPlacePiece(board, currentPiece, row, col)) {
-                    const newBoard = this.placePiece(board, currentPiece, row, col);
-                    const { board: clearedBoard, clearedLines } = this.clearLines(newBoard);
-                    
-                    const move = {
-                        piece: currentPiece,
-                        position: [row, col],
-                        pieceIndex: placedPieces.length,
-                        clearedLines,
-                        boardAfter: clearedBoard
-                    };
-                    
-                    const result = this.solve(clearedBoard, remainingPieces, [...placedPieces, move]);
-                    if (result.success) {
-                        return result;
+        // Try each remaining piece (not just the first one)
+        for (let pieceIndex = 0; pieceIndex < pieces.length; pieceIndex++) {
+            const currentPiece = pieces[pieceIndex];
+            const remainingPieces = pieces.filter((_, index) => index !== pieceIndex);
+            
+            // Try placing the current piece at every possible position
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (this.canPlacePiece(board, currentPiece, row, col)) {
+                        const newBoard = this.placePiece(board, currentPiece, row, col);
+                        const { board: clearedBoard, clearedLines } = this.clearLines(newBoard);
+                        
+                        const move = {
+                            piece: currentPiece,
+                            position: [row, col],
+                            pieceIndex: placedPieces.length,
+                            originalPieceIndex: this.getOriginalPieceIndex(currentPiece),
+                            clearedLines,
+                            boardAfter: clearedBoard
+                        };
+                        
+                        const result = this.solve(clearedBoard, remainingPieces, [...placedPieces, move]);
+                        if (result.success) {
+                            return result;
+                        }
                     }
                 }
             }
         }
         
         return { success: false, moves: [] };
+    }
+
+    // Helper method to find which original piece this is
+    getOriginalPieceIndex(piece) {
+        for (let i = 0; i < this.pieces.length; i++) {
+            if (this.piecesAreEqual(piece, this.pieces[i])) {
+                return i;
+            }
+        }
+        return 0; // fallback
+    }
+
+    // Helper method to compare two pieces
+    piecesAreEqual(piece1, piece2) {
+        if (piece1.length !== piece2.length) return false;
+        for (let row = 0; row < piece1.length; row++) {
+            if (piece1[row].length !== piece2[row].length) return false;
+            for (let col = 0; col < piece1[row].length; col++) {
+                if (piece1[row][col] !== piece2[row][col]) return false;
+            }
+        }
+        return true;
     }
 
     solvePuzzle() {
@@ -486,8 +512,10 @@ class BlockPuzzleSolver {
                 stepCard.style.background = 'rgba(255, 215, 0, 0.1)';
             }
             
+            const originalPieceNum = (move.originalPieceIndex !== undefined) ? move.originalPieceIndex + 1 : move.pieceIndex + 1;
+            
             stepCard.innerHTML = `
-                <h4>Step ${index + 1}: Place Piece ${move.pieceIndex + 1}</h4>
+                <h4>Step ${index + 1}: Place Piece ${originalPieceNum}</h4>
                 <p>Position: Row ${move.position[0] + 1}, Column ${move.position[1] + 1}</p>
                 <p>Lines cleared: ${move.clearedLines}</p>
                 <div class="step-preview" id="preview-${index}"></div>
@@ -567,17 +595,19 @@ class BlockPuzzleSolver {
                 const boardCol = currentMove.position[1] + col;
                 const cell = document.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
                 if (cell && this.board[boardRow][boardCol]) {
-                    cell.classList.add(`solution-step-${currentMove.pieceIndex + 1}`);
+                    const originalPieceNum = (currentMove.originalPieceIndex !== undefined) ? currentMove.originalPieceIndex + 1 : currentMove.pieceIndex + 1;
+                    cell.classList.add(`solution-step-${originalPieceNum}`);
                 }
             });
             
             // Update info
+            const originalPieceNum = (currentMove.originalPieceIndex !== undefined) ? currentMove.originalPieceIndex + 1 : currentMove.pieceIndex + 1;
             document.getElementById('solutionInfo').innerHTML = `
                 <div style="color: #4CAF50;">
                     <strong>Solution Found!</strong><br>
                     ${this.solution.length} pieces to place<br>
                     Step ${this.currentStep + 1} of ${this.solution.length}<br>
-                    <strong>Current:</strong> Place Piece ${currentMove.pieceIndex + 1} at Row ${currentMove.position[0] + 1}, Column ${currentMove.position[1] + 1}
+                    <strong>Current:</strong> Place Piece ${originalPieceNum} at Row ${currentMove.position[0] + 1}, Column ${currentMove.position[1] + 1}
                 </div>
             `;
         } else {
