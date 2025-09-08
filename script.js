@@ -585,29 +585,35 @@ class BlockPuzzleSolver {
             }
         });
         
-        // Highlight the current step's piece if we're not at the end
+        // Add outline for the current step's piece placement (even if cleared)
         if (this.currentStep < this.solution.length) {
             const currentMove = this.solution[this.currentStep];
             const compactPiece = this.getCompactPiece(currentMove.piece);
+            const originalPieceNum = (currentMove.originalPieceIndex !== undefined) ? currentMove.originalPieceIndex + 1 : currentMove.pieceIndex + 1;
             
             compactPiece.forEach(([row, col]) => {
                 const boardRow = currentMove.position[0] + row;
                 const boardCol = currentMove.position[1] + col;
                 const cell = document.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
-                if (cell && this.board[boardRow][boardCol]) {
-                    const originalPieceNum = (currentMove.originalPieceIndex !== undefined) ? currentMove.originalPieceIndex + 1 : currentMove.pieceIndex + 1;
-                    cell.classList.add(`solution-step-${originalPieceNum}`);
+                if (cell) {
+                    // Add outline class to show where piece was placed
+                    cell.classList.add('piece-outline', `piece-outline-${originalPieceNum}`);
+                    
+                    // If the cell is still filled, also add the step highlight
+                    if (this.board[boardRow][boardCol]) {
+                        cell.classList.add(`solution-step-${originalPieceNum}`);
+                    }
                 }
             });
             
             // Update info
-            const originalPieceNum = (currentMove.originalPieceIndex !== undefined) ? currentMove.originalPieceIndex + 1 : currentMove.pieceIndex + 1;
             document.getElementById('solutionInfo').innerHTML = `
                 <div style="color: #4CAF50;">
                     <strong>Solution Found!</strong><br>
                     ${this.solution.length} pieces to place<br>
                     Step ${this.currentStep + 1} of ${this.solution.length}<br>
                     <strong>Current:</strong> Place Piece ${originalPieceNum} at Row ${currentMove.position[0] + 1}, Column ${currentMove.position[1] + 1}
+                    ${currentMove.clearedLines > 0 ? `<br><em>Lines cleared: ${currentMove.clearedLines}</em>` : ''}
                 </div>
             `;
         } else {

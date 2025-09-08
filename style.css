@@ -107,6 +107,50 @@ h2 {
     border: 2px solid #0000FF;
 }
 
+/* Piece outline styles for cleared pieces */
+.board-cell.piece-outline {
+    position: relative;
+}
+
+.board-cell.piece-outline-1::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid #FF0000;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.board-cell.piece-outline-2::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid #00FF00;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.board-cell.piece-outline-3::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid #0000FF;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
 /* Pieces */
 .pieces-container {
     display: flex;
