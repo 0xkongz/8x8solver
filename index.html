@@ -4,46 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>8x8 Block Puzzle Solver</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
+    <div class="container">
         <h1>8x8 Block Puzzle Solver</h1>
-    </header>
-    
-    <main>
-        <section id="board-editor">
-            <h2>Board Editor</h2>
-            <!-- Board will be rendered here -->
-            <div id="board"></div>
-        </section>
         
-        <section id="pieces-selector">
-            <h2>Pieces Selector</h2>
-            <!-- Options for selecting pieces -->
-            <div id="pieces"></div>
-        </section>
-        
-        <section id="custom-piece-creator">
-            <h2>Custom Piece Creator</h2>
-            <!-- Form for creating custom pieces -->
-            <form id="custom-piece-form">
-                <input type="text" placeholder="Piece Name" required>
-                <input type="text" placeholder="Piece Shape" required>
-                <button type="submit">Create Piece</button>
-            </form>
-        </section>
-        
-        <section id="solver-controls">
-            <h2>Solver Controls</h2>
-            <button id="solve-button">Solve</button>
-            <button id="reset-button">Reset</button>
-        </section>
-    </main>
-    
-    <footer>
-        <p>&copy; 2023 8x8 Puzzle Solver</p>
-    </footer>
+        <div class="main-content">
+            <!-- Board Editor Section -->
+            <div class="board-section">
+                <h2>Board Editor</h2>
+                <div class="board-controls">
+                    <button id="clearBoard">Clear Board</button>
+                    <button id="randomBoard">Random Setup</button>
+                </div>
+                <div id="gameBoard" class="game-board"></div>
+            </div>
+
+            <!-- Pieces Section -->
+            <div class="pieces-section">
+                <h2>Available Pieces</h2>
+                <div class="piece-controls">
+                    <button id="randomPieces">Random 3 Pieces</button>
+                    <button id="clearPieces">Clear Pieces</button>
+                </div>
+                <div id="piecesContainer" class="pieces-container">
+                    <div class="piece-slot" data-piece="0">
+                        <h3>Piece 1</h3>
+                        <div class="piece-grid" id="piece0"></div>
+                    </div>
+                    <div class="piece-slot" data-piece="1">
+                        <h3>Piece 2</h3>
+                        <div class="piece-grid" id="piece1"></div>
+                    </div>
+                    <div class="piece-slot" data-piece="2">
+                        <h3>Piece 3</h3>
+                        <div class="piece-grid" id="piece2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Piece Creator Section -->
+            <div class="creator-section">
+                <h2>Piece Creator</h2>
+                <div class="creator-controls">
+                    <button id="createPiece">Create Custom Piece</button>
+                    <button id="clearCreator">Clear</button>
+                    <select id="targetPieceSlot">
+                        <option value="0">Replace Piece 1</option>
+                        <option value="1">Replace Piece 2</option>
+                        <option value="2">Replace Piece 3</option>
+                    </select>
+                </div>
+                <div id="pieceCreator" class="piece-creator"></div>
+            </div>
+        </div>
+
+        <!-- Solver Section -->
+        <div class="solver-section">
+            <h2>Solver</h2>
+            <div class="solver-controls">
+                <button id="solveButton">Solve Puzzle</button>
+                <button id="nextStep">Next Step</button>
+                <button id="prevStep">Previous Step</button>
+                <button id="resetSolution">Reset</button>
+            </div>
+            <div id="solutionInfo" class="solution-info"></div>
+            <div id="solutionSteps" class="solution-steps"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
